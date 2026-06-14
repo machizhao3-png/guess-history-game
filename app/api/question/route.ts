@@ -15,9 +15,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.OPENROUTER_API_KEY) {
       return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY not configured" },
+        { error: "OPENROUTER_API_KEY not configured" },
         { status: 500 }
       );
     }

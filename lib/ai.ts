@@ -1,9 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 const SYSTEM_PROMPT = `你是一个中国历史知识专家。你要在一个猜历史人物的游戏中扮演一个角色。
 
 游戏规则：
@@ -20,6 +14,35 @@ export interface AIResponse {
   error?: string;
 }
 
+async function callOpenRouter(
+  messages: { role: string; content: string }[],
+  systemPrompt: string
+): Promise<string> {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      "HTTP-Referer": "http://localhost:3000",
+      "X-Title": "GuessHistoryGame",
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-4-turbo",
+      system: systemPrompt,
+      messages,
+      max_tokens: 100,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`OpenRouter API error: ${JSON.stringify(error)}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
+}
+
 export async function generatePerson(
   excludedFigures: string[] = []
 ): Promise<string> {
@@ -30,24 +53,19 @@ export async function generatePerson(
 
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const response = await client.messages.create({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 100,
-        system: SYSTEM_PROMPT + exclusionText,
-        messages: [
+      const text = await callOpenRouter(
+        [
           {
             role: "user",
             content: "请选择一个中国古代历史人物，只回复人物名字，不要有其他内容。",
           },
         ],
-      });
-
-      const text =
-        response.content[0].type === "text" ? response.content[0].text : "";
-      return text.trim();
+        SYSTEM_PROMPT + exclusionText
+      );
+      return text;
     } catch (error) {
       if (attempt < 2) {
-        console.warn(`[AI] Retry generatePerson attempt ${attempt + 1}`);
+        console.warn(`[AI] Retry generatePerson attempt ${attempt + 1}:`, error);
         await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
       } else {
         throw error;
@@ -63,20 +81,16 @@ export async function answerQuestion(
   question: string
 ): Promise<AIResponse> {
   try {
-    const response = await client.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 10,
-      system: `${SYSTEM_PROMPT}\n\n我心想的人物是：${person}`,
-      messages: [
+    const text = await callOpenRouter(
+      [
         {
           role: "user",
           content: `玩家的问题是：${question}\n\n请只回答"是"、"不是"、"不确定"、"无关"或"猜对了"中的一个词。`,
         },
       ],
-    });
+      `${SYSTEM_PROMPT}\n\n我心想的人物是：${person}`
+    );
 
-    const text =
-      response.content[0].type === "text" ? response.content[0].text : "";
     const reply = text.trim();
 
     if (["是", "不是", "不确定", "无关", "猜对了"].includes(reply)) {
