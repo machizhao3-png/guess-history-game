@@ -61,7 +61,7 @@ export function QAPage() {
   }, [gameId]);
 
   const submitQuestion = async () => {
-    if (!input.trim() || !gameId || !user.nickname) return;
+    if (!input.trim() || !gameId || !user.nickname || !user.id) return;
 
     setLoading(true);
     setError('');
@@ -72,7 +72,7 @@ export function QAPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gameId,
-          userId: user.nickname,
+          userId: user.id,
           question: input,
           userNickname: user.nickname,
           userAvatar: user.avatar,

@@ -15,9 +15,9 @@ export function EntryModal() {
     const stored = localStorage.getItem('user');
     if (stored) {
       const userData = JSON.parse(stored);
-      setUser(userData.nickname, userData.avatar);
+      setUser(userData.id, userData.nickname, userData.avatar);
     }
-  }, []);
+  }, [setUser]);
 
   if (user.nickname) return null;
 
@@ -34,9 +34,9 @@ export function EntryModal() {
 
       const data = await res.json();
       if (data.success) {
-        setUser(nickname, avatar);
+        setUser(data.userId, nickname, avatar);
         setGameId(data.gameId);
-        localStorage.setItem('user', JSON.stringify({ nickname, avatar }));
+        localStorage.setItem('user', JSON.stringify({ id: data.userId, nickname, avatar }));
       }
     } catch (error) {
       console.error('Init error:', error);

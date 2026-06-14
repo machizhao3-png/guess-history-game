@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 interface User {
+  id: string;
   nickname: string;
   avatar: string;
 }
@@ -14,24 +15,24 @@ interface GameStore {
   user: User;
   gameId: string;
   stats: Stats;
-  setUser: (nickname: string, avatar: string) => void;
+  setUser: (id: string, nickname: string, avatar: string) => void;
   setGameId: (gameId: string) => void;
   setStats: (stats: Stats) => void;
   clearUser: () => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
-  user: { nickname: '', avatar: '' },
+  user: { id: '', nickname: '', avatar: '' },
   gameId: '',
   stats: { totalGuessed: 0, totalQuestions: 0 },
 
-  setUser: (nickname: string, avatar: string) =>
-    set({ user: { nickname, avatar } }),
+  setUser: (id: string, nickname: string, avatar: string) =>
+    set({ user: { id, nickname, avatar } }),
 
   setGameId: (gameId: string) => set({ gameId }),
 
   setStats: (stats: Stats) => set({ stats }),
 
   clearUser: () =>
-    set({ user: { nickname: '', avatar: '' }, gameId: '' }),
+    set({ user: { id: '', nickname: '', avatar: '' }, gameId: '' }),
 }));
