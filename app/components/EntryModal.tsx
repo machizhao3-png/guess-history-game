@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/lib/store';
 
-const EMOJIS = ['😀', '😎', '🤓', '😍', '🥳', '😸', '🐶', '🐰', '🦁', '🐯', '🦊', '🐻', '🐼', '🐨', '🦊', '🐢', '🦅', '🦋', '🌟', '✨'];
+const EMOJIS = ['😀', '😎', '🤓', '😍', '🥳', '😸', '🐶', '🐰', '🦁', '🐯', '🦊', '🐻', '🐼', '🐨', '🐢', '🦅', '🦋', '🌟', '✨', '🎉'];
 
 export function EntryModal() {
   const [nickname, setNickname] = useState('');
@@ -17,7 +17,7 @@ export function EntryModal() {
       const userData = JSON.parse(stored);
       setUser(userData.id, userData.nickname, userData.avatar);
     }
-  }, [setUser]);
+  }, []);
 
   if (user.nickname) return null;
 
