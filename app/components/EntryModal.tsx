@@ -15,7 +15,27 @@ export function EntryModal() {
     const stored = localStorage.getItem('user');
     if (stored) {
       const userData = JSON.parse(stored);
-      setUser(userData.id, userData.nickname, userData.avatar);
+      // 回归用户：用 localStorage 的昵称和头像调用 /api/init 获取新 gameId
+      const initReturningUser = async () => {
+        try {
+          const res = await fetch('/api/init', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nickname: userData.nickname, avatar: userData.avatar }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            setUser(data.userId, userData.nickname, userData.avatar);
+            setGameId(data.gameId);
+            localStorage.setItem('user', JSON.stringify({ id: data.userId, nickname: userData.nickname, avatar: userData.avatar }));
+          }
+        } catch (error) {
+          console.error('[EntryModal] Failed to init returning user:', error);
+          // 降级：至少设置昵称和头像，让用户能看到界面
+          setUser(userData.id || '', userData.nickname, userData.avatar);
+        }
+      };
+      initReturningUser();
     }
   }, []);
 

@@ -61,12 +61,23 @@ export function QAPage() {
   }, [gameId]);
 
   const submitQuestion = async () => {
-    if (!input.trim() || !gameId || !user.nickname || !user.id) return;
+    console.log('[QAPage] Submit button clicked');
+    console.log('[QAPage] input:', input.trim());
+    console.log('[QAPage] gameId:', gameId);
+    console.log('[QAPage] user:', user);
+    console.log('[QAPage] loading:', loading);
+    console.log('[QAPage] isOnline:', isOnline);
+
+    if (!input.trim() || !gameId || !user.nickname || !user.id) {
+      console.log('[QAPage] Early return - missing required fields');
+      return;
+    }
 
     setLoading(true);
     setError('');
 
     try {
+      console.log('[QAPage] Sending question...');
       const res = await fetch('/api/question', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,6 +95,7 @@ export function QAPage() {
       }
 
       const data = await res.json();
+      console.log('[QAPage] Response:', data);
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to submit question');
@@ -106,8 +118,8 @@ export function QAPage() {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[QAPage] Error:', err);
       setError(`提问失败：${message}`);
-      console.error('Failed to submit question:', err);
     }
 
     setLoading(false);

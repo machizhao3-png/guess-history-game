@@ -27,7 +27,7 @@ async function callOpenRouter(
       "X-Title": "GuessHistoryGame",
     },
     body: JSON.stringify({
-      model: "openai/gpt-4-turbo",
+      model: "deepseek/deepseek-chat-v3-0324",
       system: systemPrompt,
       messages,
       max_tokens: 100,

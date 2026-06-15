@@ -34,7 +34,7 @@ export async function initGameState(): Promise<GameState> {
 export async function startNewGame(): Promise<GameState> {
   const historicalFigure = await prisma.historicalFigure.create({
     data: {
-      name: `Temp_${Date.now()}`,
+      name: `Temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     },
   });
 
@@ -64,10 +64,20 @@ export async function updatePersonName(
 
   if (!game) return;
 
-  await prisma.historicalFigure.update({
-    where: { id: game.historicalFigureId },
-    data: { name: personName },
-  });
+  try {
+    await prisma.historicalFigure.update({
+      where: { id: game.historicalFigureId },
+      data: { name: personName },
+    });
+  } catch (error: any) {
+    // If unique constraint fails, it means the person name already exists
+    // This is OK, just log and continue
+    if (error.code === 'P2002') {
+      console.warn(`[GameState] Person name already exists: ${personName}`);
+      return;
+    }
+    throw error;
+  }
 
   if (currentGameState?.gameId === gameId) {
     currentGameState.currentPerson = personName;

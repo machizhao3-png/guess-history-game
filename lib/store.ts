@@ -26,10 +26,15 @@ export const useGameStore = create<GameStore>((set) => ({
   gameId: '',
   stats: { totalGuessed: 0, totalQuestions: 0 },
 
-  setUser: (id: string, nickname: string, avatar: string) =>
-    set({ user: { id, nickname, avatar } }),
+  setUser: (id: string, nickname: string, avatar: string) => {
+    console.log('[Store] setUser called:', { id, nickname, avatar });
+    set({ user: { id, nickname, avatar } });
+  },
 
-  setGameId: (gameId: string) => set({ gameId }),
+  setGameId: (gameId: string) => {
+    console.log('[Store] setGameId called:', gameId);
+    set({ gameId });
+  },
 
   setStats: (stats: Stats) => set({ stats }),
 
